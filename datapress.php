@@ -101,7 +101,7 @@ function datapress_model_add() {
     
 
 
-    ?>
+    ?><h1><?php echo $model['title']?></h1>
     <input type="hidden" name="model" value="<?php echo $model?>">
     <?php 
     $model = $GLOBALS['models'][$model_id];
@@ -115,7 +115,7 @@ function datapress_model_add() {
         
     ?>
     <input type="hidden" name="id" value="<?php echo $row_id?>">
-    <?php } var_dump($row); ?><table><?php
+    <?php } ?><table><?php
     foreach($model['fields'] as $f => $field) {
         if ($f == 'id') {
             continue;
@@ -207,24 +207,27 @@ function datapress_model_index() {
     <h2><?php echo $model['title']?>s <a href="/wp-admin/admin.php?page=<?php echo $GLOBALS['app_namespace']?>-<?php echo $model_id?>-add" class="add-new-h2">Add New</a></h2>
     <table class="wp-list-table widefat fixed striped posts">
         <thead>
-            <?php foreach($model['fields'] as $f => $field): $fields[] = $field; $_fields[] = $f;?>
+            <?php foreach($model['fields'] as $f => $field): $fields[] = $field; $_fields[] = $f; if ($f == 'id') continue;?>
             <th class="manage-column column-cb check-column">
                 <?php echo $field['title']?>
             </th>
         <?php endforeach;?>
+            <th class="wp-list-table widefat fixed striped posts">Edit</th>
         </thead>
         <tbody>
             <?php
             // Get data
-            $_fields = implode(', ', $fields);
-
-            $rows = $wpdb->get_results("SELECT $fields FROM $model", ARRAY_A);
-
+            $_fields = implode(', ', $_fields);
+            $table = $wpdb->prefix . $model_id;
+            $rows = $wpdb->get_results("SELECT $_fields FROM $table ORDER BY id DESC", ARRAY_A);
             foreach($rows as $row):?>
             <tr class="iedit author-self level-0 post-1 type-post status-publish format-standard hentry category-uncategorized">
-                <?php foreach($model['fields'] as $f => $field):?>
+                <?php foreach($model['fields'] as $f => $field):
+                if ($f == 'id') continue;
+                ?>
                 <td><?php echo $row[$f]?></td>
                 <?php endforeach;?>
+                <td class="iedit author-self level-0 post-1 type-post status-publish format-standard hentry category-uncategorized"><a class="button" href="?page=<?php echo $GLOBALS['app_namespace']?>-<?php echo $model_id?>-add&amp;id=<?php echo $row['id']?>">Edit</a></td>
             </tr>
             <?php endforeach;?>
         </tbody>
